@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>“To Someone Truly Rare 💎”</title>
+  <style>
+    /* Basic reset & typography */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body,
+    #root {
+      height: 100%;
+      width: 100%
+    }
+
+    body {
+      font-family: Inter, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial;
+      background: #000814;
+      color: #bfffe6;
+      overflow: hidden
+    }
+
+    /* App layout */
+    .app {
+      position: relative;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .ui {
+      position: absolute;
+      z-index: 30;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center
+    }
+
+    .card {
+      pointer-events: auto;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(5, 10, 20, 0.3));
+      backdrop-filter: blur(4px);
+      padding: 1.25rem 1.5rem;
+      border-radius: 18px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      max-width: 95vw;
+      min-height: 40vh;
+    }
+
+    h1 {
+      font-size: clamp(1.5rem, 3.9vw, 2.2rem);
+      margin-bottom: 5rem
+    }
+
+    h2 {
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      margin-bottom: 4rem
+    }
+
+    .btn {
+      margin-top: 4rem;
+      padding: 1rem 2.1rem;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(90deg, #00ffd5, #6ac8ff);
+      color: #001;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 6px 20px rgba(0, 255, 200, 0.12);
+      transform-origin: center;
+    }
+
+    .btn:active {
+      transform: scale(.98)
+    }
+
+    .btn:hover {
+      background: linear-gradient(90deg, #ff9d76, #ff6bc6);
+      /* your hover gradient */
+      box-shadow: 0 6px 25px rgba(255, 107, 198, 0.4);
+      /* optional glow effect */
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+    }
+
+
+    /* Footer */
+    .footer {
+      position: fixed;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      color: #66ffcc;
+      font-size: .85rem;
+      z-index: 40
+    }
+
+    /* Page2 text */
+    .typewriter {
+      font-family: 'Segoe UI', system-ui;
+      font-size: clamp(1rem, 2.2vw, 1.1rem);
+      max-width: 86vw;
+      margin-top: 5rem
+    }
+
+    /* Confetti container (DOM) */
+    .confetti-root {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 35
+    }
+
+    /* Mobile-specific spacing */
+    @media (max-width:600px) {
+      .card {
+        padding: 1rem;
+        border-radius: 14px
+      }
+
+      .btn {
+        padding: .75rem 1.6rem
+      }
+    }
+
+    /* Canvas fills the screen under everything */
+    canvas {
+      display: block
+    }
+    .glow {
+  color: #00e1ff;              /* bright cyan-blue */
+  text-shadow: 0 0 5px #00e1ff,
+               0 0 10px #00e1ff,
+               0 0 20px #00e1ff,
+               0 0 40px #00e1ff;
+  animation: sparkle 2s infinite alternate;
+}
+
+@keyframes sparkle {
+  from {
+    text-shadow: 0 0 5px #00e1ff,
+                 0 0 10px #00e1ff,
+                 0 0 20px #00e1ff,
+                 0 0 40px #00e1ff;
+  }
+  to {
+    text-shadow: 0 0 10px #fff,
+                 0 0 20px #00e1ff,
+                 0 0 30px #00e1ff,
+                 0 0 60px #00e1ff;
+  }
+}
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <!-- Audio assets (local files expected next to index.html) -->
+  <audio id="bgmusic" src="song.mp3" preload="auto"></audio>
+  <audio id="clapSound" src="cheering.mp3" preload="auto"></audio>
+
+  <!-- Libraries via CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="https://unpkg.com/three@0.152.2/build/three.min.js"></script>
+  <script src="https://unpkg.com/gsap@3.12.2/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/gsap@3.12.2/dist/TextPlugin.min.js"></script>
+
+  <!-- App code (JSX via Babel) -->
+  <script type="text/babel">
+    const { useEffect, useRef, useState } = React;
+
+    // Utility: make a canvas texture with an emoji (for sprites)
+    function emojiTexture(emoji, size = 128) {
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, size, size);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = Math.floor(size * 0.7) + 'px serif';
+      ctx.fillText(emoji, size / 2, size / 2 + 4);
+      return new THREE.CanvasTexture(c);
+    }
+
+    function StarScene({ playing, onExplode }) {
+      const mountRef = useRef();
+      const three = useRef({});
+
+      useEffect(() => {
+        let mounted = true;
+        const container = mountRef.current;
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 2000);
+        camera.position.set(0, 0, 60);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // subtle fog for depth
+        scene.fog = new THREE.FogExp2(0x000010, 0.0025);
+
+        // starfield
+        const starCount = 1200;
+        const positions = new Float32Array(starCount * 3);
+        const colors = new Float32Array(starCount * 3);
+        for (let i = 0; i < starCount; i++) {
+          const r = 200 + Math.random() * 800;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos((Math.random() * 2) - 1);
+          const x = r * Math.sin(phi) * Math.cos(theta);
+          const y = r * Math.sin(phi) * Math.sin(theta);
+          const z = r * Math.cos(phi);
+          positions[i * 3] = x; positions[i * 3 + 1] = y; positions[i * 3 + 2] = z;
+          const hue = 160 + Math.random() * 80;
+          const col = new THREE.Color(`hsl(${hue},70%,${40 + Math.random() * 40}%)`);
+          colors[i * 3] = col.r; colors[i * 3 + 1] = col.g; colors[i * 3 + 2] = col.b;
+        }
+        const geom = new THREE.BufferGeometry();
+        geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const mat = new THREE.PointsMaterial({ size: 1.8, vertexColors: true, sizeAttenuation: true, transparent: true, opacity: 0.95, depthWrite: false, blending: THREE.AdditiveBlending });
+        const points = new THREE.Points(geom, mat);
+        scene.add(points);
+
+        // twinkle via shader-like approach: create slight scale animation with GSAP
+        const twinkle = () => {
+          gsap.to(points.material, { duration: 1.5, opacity: 0.4 + Math.random() * 0.9, ease: 'sine.inOut', onComplete: twinkle });
+        };
+        twinkle();
+
+        // aurora: a large thin plane with a canvas gradient texture
+        const auroraCanvas = document.createElement('canvas'); auroraCanvas.width = 1024; auroraCanvas.height = 256;
+        const ac = auroraCanvas.getContext('2d');
+        const grad = ac.createLinearGradient(0, 0, auroraCanvas.width, 0);
+        grad.addColorStop(0, 'rgba(0,255,200,0.06)');
+        grad.addColorStop(0.4, 'rgba(120,80,255,0.06)');
+        grad.addColorStop(1, 'rgba(255,120,200,0.03)');
+        ac.fillStyle = grad; ac.fillRect(0, 0, auroraCanvas.width, auroraCanvas.height);
+        const aurTex = new THREE.CanvasTexture(auroraCanvas);
+        aurTex.wrapS = aurTex.wrapT = THREE.RepeatWrapping;
+        const aurMat = new THREE.MeshBasicMaterial({ map: aurTex, transparent: true, blending: THREE.AdditiveBlending, opacity: 0.9, depthWrite: false });
+        const aurGeo = new THREE.PlaneGeometry(1800, 400, 32, 8);
+        const aurora = new THREE.Mesh(aurGeo, aurMat);
+        aurora.rotation.x = -0.45; aurora.position.set(0, -40, -200);
+        scene.add(aurora);
+
+        // gentle aurora movement via GSAP
+        gsap.to(aurora.position, { y: -30, duration: 8, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+        gsap.to(aurTex.offset, { x: 2, duration: 20, repeat: -1, ease: 'none' });
+
+        // balloons: sprite emojis
+        const emojiList = ["🎉", "🎊", "💖", "🌟"];
+        const balloonGroup = new THREE.Group(); scene.add(balloonGroup);
+        for (let i = 0; i < 16; i++) {
+          const tex = emojiTexture(emojiList[i % emojiList.length], 128);
+          const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+          const s = new THREE.Sprite(mat);
+          s.scale.set(8 + Math.random() * 10, 8 + Math.random() * 10, 1);
+          s.position.set((Math.random() - 0.5) * 160, -100 - Math.random() * 40, -50 - Math.random() * 200);
+          balloonGroup.add(s);
+          // float animation
+          gsap.to(s.position, { y: 60 + Math.random() * 60, duration: 6 + Math.random() * 8, delay: Math.random() * 4, ease: 'sine.inOut', repeat: -1, yoyo: true });
+          gsap.to(s.rotation, { z: Math.random() * Math.PI, duration: 8 + Math.random() * 6, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+        }
+
+        // responsive
+        const onResize = () => {
+          const w = container.clientWidth, h = container.clientHeight;
+          camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h);
+        };
+        window.addEventListener('resize', onResize);
+
+        // simple camera drift timeline
+        const camTl = gsap.timeline({ repeat: -1, yoyo: true });
+        camTl.to(camera.position, { x: 6, y: 4, duration: 10, ease: 'sine.inOut' }).to(camera.position, { z: 55, duration: 10, ease: 'sine.inOut' }, 0);
+
+        // render loop
+        let raf;
+        const animate = () => {
+          if (!mounted) return;
+          // slow rotation for parallax
+          points.rotation.y += 0.0008;
+          aurora.rotation.z += 0.0004;
+          renderer.render(scene, camera);
+          raf = requestAnimationFrame(animate);
+        };
+        animate();
+
+        // expose explode function
+        three.current = {
+          scene, camera, renderer, points, balloonGroup, explode() {
+            // small particle burst near camera
+            const burstGeom = new THREE.BufferGeometry();
+            const n = 120;
+            const pos = new Float32Array(n * 3);
+            for (let i = 0; i < n; i++) {
+              pos[i * 3] = (Math.random() - 0.5) * 30;
+              pos[i * 3 + 1] = (Math.random() - 0.5) * 30 + 10;
+              pos[i * 3 + 2] = (Math.random() - 0.5) * 30 - 20;
+            }
+            burstGeom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            const burstMat = new THREE.PointsMaterial({ size: 2.6, color: 0xffffff, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false });
+            const burst = new THREE.Points(burstGeom, burstMat);
+            scene.add(burst);
+            gsap.to(burst.material, { opacity: 0, duration: 1.6, ease: 'power2.out', onComplete: () => { scene.remove(burst); burstGeom.dispose(); burstMat.dispose(); } });
+            gsap.to(burst.geometry.attributes.position.array, {// animate values to spread
+              duration: 1.4, ease: 'power2.out', onUpdate: () => { burst.geometry.attributes.position.needsUpdate = true; }, onComplete: () => { }
+            });
+          }
+        };
+
+        // cleanup
+        return () => {
+          mounted = false; cancelAnimationFrame(raf); window.removeEventListener('resize', onResize);
+          try { container.removeChild(renderer.domElement) } catch (e) { }
+          scene.children.slice().forEach(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); scene.remove(c); });
+        };
+      }, []);
+
+      // if parent requests explosion (play confetti too)
+      useEffect(() => {
+        if (playing && three.current && three.current.explode) {
+          three.current.explode();
+          if (onExplode) onExplode();
+        }
+      }, [playing]);
+
+      return <div ref={mountRef} style={{ position: 'absolute', inset: 0 }} />;
+    }
+
+    function ConfettiDOM() {
+      // simple DOM confetti burst function for Page2
+      const rootRef = useRef();
+      function blast() {
+        const root = rootRef.current;
+        for (let i = 0; i < 120; i++) {
+          const el = document.createElement('div');
+          el.style.position = 'absolute'; el.style.left = Math.random() * 100 + '%'; el.style.top = Math.random() * 10 + '%';
+          const size = 6 + Math.random() * 12; el.style.width = el.style.height = size + 'px';
+          el.style.borderRadius = (Math.random() > 0.5 ? '2px' : '50%');
+          el.style.backgroundColor = `hsl(${Math.floor(Math.random() * 360)},80%,60%)`;
+          el.style.opacity = '1'; el.style.pointerEvents = 'none'; el.style.transform = 'translateY(0)';
+          root.appendChild(el);
+          gsap.to(el, { y: window.innerHeight + 200, rotation: Math.random() * 720, duration: 2 + Math.random() * 1.8, ease: 'power2.out', onComplete: () => el.remove() });
+        }
+      }
+
+      // expose via ref
+      useEffect(() => { window._blastConfetti = blast; }, []);
+      return <div className="confetti-root" ref={rootRef} />;
+    }
+
+    function Page1({ onStart }) {
+      const btnRef = useRef();
+      useEffect(() => { // subtle button float
+        gsap.fromTo(btnRef.current, { y: 20 }, { y: -6, duration: 1.6, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+      }, []);
+
+      return (
+        <div className="ui" style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <div className="card" style={{ maxWidth: 520 }}>
+            <h1>Look up…Beneath the November Sky, a birthday wish for ✨</h1>
+            <p style={{ opacity: .82, marginTop: 8 }}>This day belongs to someone worth remembering ✨
+              Someone whose presence makes the world a little brighter 🌸
+              And today is all about them 🎉" 🕊️</p>
+            <button ref={btnRef} className="btn" onClick={onStart}>Open the Skies✨</button>
+          </div>
+        </div>
+      );
+    }
+
+    function Page2({ lines, onFinish }) {
+      const typedRef = useRef();
+      const clapRef = useRef();
+      useEffect(() => {
+        // use GSAP TextPlugin to simulate typewriter
+        const ctx = gsap.context(() => {
+          let tl = gsap.timeline({ onComplete: () => { if (onFinish) onFinish(); } });
+          lines.forEach((line, idx) => {
+            tl.to(typedRef.current, { duration: line.length * 0.06, text: line, ease: 'none', delay: idx === 0 ? 0 : 1.2 });
+          });
+          tl.add(() => { // after texts
+            // trigger confetti DOM
+            if (window._blastConfetti) window._blastConfetti();
+            // play clap
+            const clap = document.getElementById('clapSound'); if (clap) { try { clap.currentTime = 0; clap.volume = 1; clap.play(); } catch (e) { } }
+          }, '+=0.8');
+        });
+        return () => ctx.revert();
+      }, []);
+
+      return (
+        <div className="ui" style={{ alignItems: 'center', justifyContent: 'flex-start', paddingTop: 90 }}>
+          <div className="card" style={{ maxWidth: 680 }}>
+            <h2 style={{ marginTop: '5rem' }}>Happy Birthday, Noorin — Brighter Than Any Star Above 🌠</h2>
+            <p className="typewriter" ref={typedRef}></p>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [stage, setStage] = useState(1); // 1 = page1, 2 = page2
+      const [playExplode, setPlayExplode] = useState(false);
+
+     const birthdayLines = [
+  "There are only a few people in my life whose presence truly makes things better — and you are one of them 🌸",
+  "Talking to you always makes me happy, because I can share anything without hesitation 💫",
+  "Maybe I wasn’t your first friend, but I want to remain a forever one 🤝",
+  "I don’t call everyone a friend, but you are more than that — someone truly special and <span class='glow'>rare 💎</span>",
+  "From being a stranger to becoming an important part of my life, I’m really glad to have you 🌟",
+  "And yeah… you are kheera without ‘k’ 😂",
+];
+
+      function handleStart() {
+        // play music
+        const music = document.getElementById('bgmusic');
+        if (music) { try { music.currentTime = 0; music.volume = 0.9; music.play(); } catch (e) { } }
+        // animate UI out and move to page2 with zoom
+        const tl = gsap.timeline({});
+        tl.to('.card', { scale: 0.9, opacity: 0, duration: .6, ease: 'power2.inOut' });
+        tl.to(document.querySelector('.card'), { autoAlpha: 0, duration: 0 });
+        tl.call(() => setStage(2));
+        // small delay then trigger explosion/confetti (Three scene will react to playExplode)
+        setTimeout(() => { setPlayExplode(true); }, 1200);
+      }
+
+      function handleExplodeDone() {
+        // ensure DOM confetti also fires (three's explode triggers onPlay)
+        if (window._blastConfetti) window._blastConfetti();
+      }
+
+      return (
+        <div className="app">
+          <StarScene playing={playExplode} onExplode={handleExplodeDone} />
+          <ConfettiDOM />
+          {stage === 1 && <Page1 onStart={handleStart} />}
+          {stage === 2 && <Page2 lines={birthdayLines} onFinish={() => {/* finished */ }} />}
+          <div className="footer">Unseen, yet always watching from the constellations — Paradoxical  ✨</div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+
+</html>
