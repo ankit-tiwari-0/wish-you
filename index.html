@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>“To Someone Truly Rare 💎”</title>
+  <title>“HAPPY BIRTHDAY”</title>
   <style>
     /* Basic reset & typography */
     * {
@@ -377,10 +377,10 @@
       return (
         <div className="ui" style={{ alignItems: 'center', justifyContent: 'center' }}>
           <div className="card" style={{ maxWidth: 520 }}>
-            <h1>Look up…Beneath the November Sky, a birthday wish for ✨</h1>
-            <p style={{ opacity: .82, marginTop: 8 }}>This day belongs to someone worth remembering ✨
-              Someone whose presence makes the world a little brighter 🌸
-              And today is all about them 🎉" 🕊️</p>
+           <h1>🌸 Celebrating the Birthday of an Amazing Teacher 🌸</h1>
+           <p style={{ opacity: .82, marginTop: 8 }}>
+          A small wish for a teacher who inspires every day ✨🎉
+           </p>
             <button ref={btnRef} className="btn" onClick={onStart}>Open the Skies✨</button>
           </div>
         </div>
@@ -421,14 +421,16 @@
       const [stage, setStage] = useState(1); // 1 = page1, 2 = page2
       const [playExplode, setPlayExplode] = useState(false);
 
-     const birthdayLines = [
-  "There are only a few people in my life whose presence truly makes things better — and you are one of them 🌸",
-  "Talking to you always makes me happy, because I can share anything without hesitation 💫",
-  "Maybe I wasn’t your first friend, but I want to remain a forever one 🤝",
-  "I don’t call everyone a friend, but you are more than that — someone truly special and <span class='glow'>rare 💎</span>",
-  "From being a stranger to becoming an important part of my life, I’m really glad to have you 🌟",
-  "And yeah… you are kheera without ‘k’ 😂",
+    const birthdayLines = [
+  "Some teachers never stop being teachers — even when the classroom ends 🌸",
+  "You may not teach anymore, but your support still guides me every day 💫",
+  "Those days under your guidance were some of the best days of my life 🤍",
+  "You are not just a teacher I met — you are a teacher for life and <span class='glow'>rare 💎</span>",
+  "Your belief in me gave me confidence when I needed it the most 🌟",
+  "Forever grateful for your guidance, care, and support — always 🙏🎉",
+  "Wishing you success and happiness in everything you choose to pursue ✨",
 ];
+
 
       function handleStart() {
         // play music
@@ -454,7 +456,7 @@
           <ConfettiDOM />
           {stage === 1 && <Page1 onStart={handleStart} />}
           {stage === 2 && <Page2 lines={birthdayLines} onFinish={() => {/* finished */ }} />}
-          <div className="footer">Unseen Watcher  ✨</div>
+          <div className="footer">Forever Mentor 💐  ✨</div>
         </div>
       );
     }
@@ -465,4 +467,5 @@
 
 
 </html>
+
 
